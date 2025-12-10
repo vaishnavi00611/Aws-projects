@@ -1,0 +1,13 @@
+aws configure --profile vpn {Credentials store krlo}
+
+And then yh script run krdo 
+#!/bin/bash
+ 
+SOURCE_DIR="/data/exports/"
+S3_PATH="s3://stylebazaar-s3-backup/uploads/"
+PROFILE_NAME="vpn-s3"
+LOG_FILE="/var/log/s3_upload.log"
+ 
+echo "[$(date)] Starting upload..." >> $LOG_FILE
+aws s3 sync "$SOURCE_DIR" "$S3_PATH" --profile $PROFILE_NAME --only-show-errors >> $LOG_FILE 2>&1
+echo "[$(date)] Upload finished." >> $LOG_FILE
