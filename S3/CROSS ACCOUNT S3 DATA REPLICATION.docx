@@ -1,0 +1,71 @@
+                        CROSS ACCOUNT S3 DATA REPLICATION
+	Create two accounts:
+•	Account A ~ Which will contain source bucket
+                   ~ Enable versioning
+•	Account B ~ Which will contain destination bucket 
+                   ~ Enable versioning
+	Create an IAM policy for the source bucket-:
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetReplicationConfiguration",
+        "s3:ListBucket",
+        "s3:GetBucketVersioning"
+      ],
+      "Resource": "arn:aws:s3:::<SOURCE-BUCKET>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObjectVersion",
+        "s3:GetObjectVersionAcl",
+        "s3:GetObjectVersionForReplication",
+        "s3:GetObjectTagging",
+        "s3:GetObjectVersionTagging"
+      ],
+      "Resource": "arn:aws:s3:::<SOURCE-BUCKET>/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ReplicateObject",
+        "s3:ReplicateDelete",
+        "s3:ReplicateTags",
+        "s3:ObjectOwnerOverrideToBucketOwner"
+      ],
+      "Resource": "arn:aws:s3:::<DESTINATION-BUCKET>/*"
+    }
+  ]
+}
+
+	Create a bucket policy for destination bucket to accept the replication
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::<ACCOUNT-A-ID>:role/<REPLICATION-ROLE-NAME>"
+      },
+      "Action": [
+        "s3:ReplicateObject",
+        "s3:ReplicateDelete",
+        "s3:ReplicateTags",
+        "s3:ObjectOwnerOverrideToBucketOwner"
+      ],
+      "Resource": "arn:aws:s3:::<DESTINATION-BUCKET>/*"
+    }
+  ]
+}
+
+	Create a replication rule for source bucket
+•	Go to Source bucket > Management > Replication
+•	Scope: Entire bucket / prefix
+•	IAM Role: Select the one created above
+•	Destination bucket: Enter Account B bucket ARN (cross-account)
+•	Enable ownership override (recommended)
+ 
+ 
